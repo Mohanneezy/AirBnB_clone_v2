@@ -1,41 +1,29 @@
 #!/usr/bin/python3
-"""This module defines a class User"""
-import hashlib
-import os
+""" holds class User"""
+import models
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer, Float
+from os import getenv
+import sqlalchemy
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-STORAGE_TYPE = os.environ.get('HBNB_TYPE_STORAGE')
 
 
 class User(BaseModel, Base):
-    """This class defines a user by various attributes"""
-    if STORAGE_TYPE == 'db':
+    """Representation of a user """
+    if models.storage_t == 'db':
         __tablename__ = 'users'
-        email = Column(string(128), nullable=False)
+        email = Column(String(128), nullable=False)
         password = Column(String(128), nullable=False)
-        first_name = Column(String(128))
-        last_name = Column(String(128))
-
-        places = relationship('Place', backref='user')
-        reviews = relationship('Review', backref='user')
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
+        places = relationship("Place", backref="user")
+        reviews = relationship("Review", backref="user")
     else:
-        email = ''
-        password = ''
-        first_name = ''
-        last_name = ''
+        email = ""
+        password = ""
+        first_name = ""
+        last_name = ""
 
     def __init__(self, *args, **kwargs):
-        """ initiates user """
-        if kwargs:
-            pwd = kwargs.pop('password', None)
-            if pwd:
-                User.__set_password(self, pwd)
+        """initializes user"""
         super().__init__(*args, **kwargs)
-
-    def __set_password(self, pwd):
-        """ custom setter """
-        secure = hashlib.md5()
-        secure.update(pwd.encode("utf-8"))
-        secure_password = secure.hexigest()
-        setattr(self, "password", secure_password)
